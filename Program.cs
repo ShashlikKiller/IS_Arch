@@ -15,7 +15,7 @@ using CsvHelper;
 namespace IS_Arch
 {
     internal class Server
-        // 1. Клиент производить только отображение данных.
+    // 1. Клиент производить только отображение данных.
     // To Do: Следующие операции производятся на стороне сервера:
     //   Передача запрошенных данных из файла:
     //   Передача всех данных
@@ -29,67 +29,8 @@ namespace IS_Arch
         static void Main(string[] args)
         {
             Console.WriteLine("This is server.");
-            // server: start
-            const string ip = "127.0.0.1";
-            const int port = 8081; // У КЛИЕНТА И СЕРВЕРА РАЗНЫЕ ПОРТЫ! СВЯЗЬ ЧЕРЕЗ СЕРВЕР И КЛИЕНТ ЭНДПОИНТ
-
-            try
-            {
-                var udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-
-                var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                udpSocket.Bind(udpEndPoint);
-                StartReceiving(udpSocket);
-                Console.WriteLine("Server started successfully!");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
-        private static async void StartReceiving(Socket udpSocket)
-        {
-            byte[] buffer = new byte[256];
-            EndPoint senderEndPoint = new IPEndPoint(IPAddress.Any, 0);
-
-            while (true)
-            {
-                int size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
-
-                string data = Encoding.UTF8.GetString(buffer, 0, size);
-                string server_answer = "";
-
-                if (TypeCheck.IntCheckBool(data))
-                {
-                    Console.WriteLine("Received: " + data);
-                    switch (Convert.ToInt32(data))
-                    {
-                        case 1:
-                            server_answer = "case 1";
-                            // Do something for menu1
-                            break;
-                        case 2:
-                            // Do something for menu2
-                            server_answer = "case 2";
-                            break;
-                        default:
-                            Console.WriteLine("Invalid input");
-                            break;
-                    }
-
-                    byte[] responseBuffer = Encoding.UTF8.GetBytes(server_answer);
-                    udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
-                }
-                else
-                {
-                    Console.WriteLine("Received invalid data");
-                }
-            }
-
-            // server: end
-
-
+            #region database
+            // database: start
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 ShouldUseConstructorParameters = type => false // Передача библиотеке разрешение на
@@ -98,7 +39,7 @@ namespace IS_Arch
             string path; // переменная пути до csv файла
             try
             {
-                path = Environment.CurrentDirectory + "\\file.csv"; // Создание пути для .csv файла
+                path = Environment.CurrentDirectory + "\\database.csv"; // Создание пути для .csv файла
             }
             catch
             {
@@ -116,11 +57,87 @@ namespace IS_Arch
                 }
                 else Students = new List<Student>();
             }
-            bool activeapp = true; // Это можно убрать, оставив в while просто true.
-            while (activeapp)
+            #endregion
+
+            #region server initialization
+            // server: start
+            const string ip = "127.0.0.1";
+            const int port = 8081; // У КЛИЕНТА И СЕРВЕРА РАЗНЫЕ ПОРТЫ! СВЯЗЬ ЧЕРЕЗ СЕРВЕР И КЛИЕНТ ЭНДПОИНТ
+
+            try
             {
-                MenuCall(Students, path);
+                var udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+
+                var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                udpSocket.Bind(udpEndPoint);
+                StartReceiving(udpSocket, Students);
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            // server: end
+            #endregion
+        }
+
+        private static async void StartReceiving(Socket udpSocket, List<Student> Students)
+        {
+            byte[] buffer = new byte[256];
+            EndPoint senderEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            Console.WriteLine("Server started successfully!");
+            while (true)
+            {
+                int size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
+
+                string data = Encoding.UTF8.GetString(buffer, 0, size);
+                string server_answer = "";
+
+                if (TypeCheck.IntCheckBool(data))
+                {
+                    Console.WriteLine("Received: " + data);
+                    switch (Convert.ToInt32(data))
+                    {
+                        case 1: // Вывод всех записей на экран
+                            
+                            server_answer = ConsoleOutputAll(Students);
+                            break;
+                        case 2: // Вывод записи по номеру
+                            // Do something for menu2
+                            server_answer = "case 2";
+                            break;
+                        case 3: // Запись данных в файл
+                            
+                            break;
+                        case 4: // Удалить запись по номеру
+                            
+                            break;
+                        case 5: // Добавление новой записи
+                            
+                            break;
+                        default:
+                            Console.WriteLine("Invalid input");
+                            
+                            break;
+                    }
+
+                    byte[] responseBuffer = Encoding.UTF8.GetBytes(server_answer);
+                    udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
+                }
+                else
+                {
+                    Console.WriteLine("Received invalid data");
+                }
+            }
+
+            // server: end
+
+
+            
+            //bool activeapp = true; // Это можно убрать, оставив в while просто true.
+            //while (activeapp)
+            //{
+             //   MenuCall(Students, path);
+            //}
         }
 
         //public void StartMessageLoop(Socket UDPSocket)

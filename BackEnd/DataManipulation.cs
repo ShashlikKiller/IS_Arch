@@ -14,36 +14,43 @@ namespace IS_Arch.BackEnd
         //   3. Запись данных в файл +
         //   4. Удаление записи (записей) из файла +
         //   5. Добавление записи в файл +
-        public static void OutputByID(List<Student> Students)
+        public static string OutputByID(List<Student> Students, int searchID)
         {
-            uint searchID = TypeCheck.IntCheck(); // СДЕЛАТЬ ПРОВЕРКУ НА ИНТ
+            string answer = "";
+            //id4search = TypeCheck.IntCheck();
             for (int i = 0; i < Students.Count(); i++)
             {
                 Student CurrentStudent = Students.ElementAt(i);
                 if (CurrentStudent.Student_id == searchID)
                 {
-                    Console.WriteLine($" Student with ID = {searchID}");
-                    ConsoleOutputSingle(CurrentStudent);
+                    answer += $" Student with ID = {searchID} \n";
+                    answer += ConsoleOutputSingle(CurrentStudent);
                     break;
                 }
+                else answer += "No students with this ID were found.";
             }
+            return answer;
         }
-        public static void MenuText()
+        public static string MenuText()
         {
-            Console.Write(" Выберите то, что вы хотите сделать, и нажмите соответствующую кнопку :\n");
-            Console.Write("   1. Вывод всех данных на экран\n");
-            Console.Write("   2. Вывод карточки студента по идентификатору\n");
-            Console.Write("   3. Сохранение всех записей в файл\n");
-            Console.Write("   4. Удалить запись по ID студента\n");
-            Console.Write("   5. Добавить новую запись\n");
-            Console.Write("   Esc. Закрытие\n");
+            string answer = "";
+            answer += " Выберите то, что вы хотите сделать, и нажмите соответствующую кнопку :\n";
+            answer += "   1. Вывод всех данных на экран\n";
+            answer += "   2. Вывод карточки студента по идентификатору\n";
+            answer += "   3. Сохранение всех записей в файл\n";
+            answer += "   4. Удалить запись по ID студента\n";
+            answer += "   5. Добавить новую запись\n";
+            answer += "   Esc. Закрытие\n";
+            return answer;
         }
-        public static void ConsoleOutputAll(List<Student> Students)
+        public static string ConsoleOutputAll(List<Student> Students)
         {
+            string answer = "";
             foreach (Student student in Students)
             {
-                ConsoleOutputSingle(student);
+                answer += ConsoleOutputSingle(student);
             }
+            return answer;
         }
 
         public static void AddNewRecord(List<Student> Students)
@@ -76,13 +83,15 @@ namespace IS_Arch.BackEnd
             }
         }
 
-        public static void ConsoleOutputSingle(Student student)
+        public static string ConsoleOutputSingle(Student student)
         {
-            Console.WriteLine("-----------------------------------------------------------------");
-            Console.WriteLine($" ID: {student.Student_id}");
-            Console.WriteLine($" Name: {student.Name} {student.Surname}");
-            Console.WriteLine($" Group: {student.Group}, Still learning - {student.LearningStatus}");
-            Console.WriteLine("-----------------------------------------------------------------");
+            string answer = "";
+            //answer += "-----------------------------------------------------------------";
+            answer += $"\n Student ID: {student.Student_id} \n";
+            answer += $" Name: {student.Name} {student.Surname}\n";
+            answer += $" Group: {student.Group}, Still learning - {student.LearningStatus}\n";
+            //answer += "-----------------------------------------------------------------";
+            return answer;
         }
     }
 }

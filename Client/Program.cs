@@ -28,7 +28,7 @@ namespace Client
                 var serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8081);
                 udpSocket.SendTo(Encoding.UTF8.GetBytes(message), serverEndPoint);
 
-                var buffer = new byte[256];
+                var buffer = new byte[4096];
                 var size = 0;
                 var data = new StringBuilder();
                 EndPoint senderEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8081);
