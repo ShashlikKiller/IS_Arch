@@ -88,7 +88,6 @@ namespace IS_Arch
             while (true)
             {
                 int size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
-
                 string data = Encoding.UTF8.GetString(buffer, 0, size);
                 string server_answer = "";
 
@@ -115,8 +114,7 @@ namespace IS_Arch
                             
                             break;
                         default:
-                            Console.WriteLine("Invalid input");
-                            
+                            server_answer = "Incorrect input. Please press the button from 1 to 5.";
                             break;
                     }
 
@@ -125,6 +123,8 @@ namespace IS_Arch
                 }
                 else
                 {
+                    byte[] responseBuffer = Encoding.UTF8.GetBytes("Invalid data. Try again.");
+                    udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
                     Console.WriteLine("Received invalid data");
                 }
             }
@@ -173,7 +173,7 @@ namespace IS_Arch
                     ConsoleOutputAll(Students);
                     break;
                 case ConsoleKey.D2: // Вывод записи по номеру
-                    OutputByID(Students);
+                    //OutputByID(Students);
                     break;
                 case ConsoleKey.D3: // Запись данных в файл
                     SaveRecords(Students, path);
