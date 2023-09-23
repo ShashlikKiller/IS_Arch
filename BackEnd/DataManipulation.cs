@@ -17,7 +17,6 @@ namespace IS_Arch.BackEnd
         public static string OutputByID(List<Student> Students, int searchID)
         {
             string answer = "";
-            //id4search = TypeCheck.IntCheck();
             for (int i = 0; i < Students.Count(); i++)
             {
                 Student CurrentStudent = Students.ElementAt(i);
@@ -25,11 +24,10 @@ namespace IS_Arch.BackEnd
                 {
                     answer += $" Student with ID = {searchID} \n";
                     answer += ConsoleOutputSingle(CurrentStudent);
-                    break;
+                    return answer;
                 }
-                else answer += "No students with this ID were found.";
             }
-            return answer;
+            return "No students with this ID were found.";
         }
         public static string MenuText()
         {

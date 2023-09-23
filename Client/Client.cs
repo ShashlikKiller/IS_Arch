@@ -8,41 +8,38 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    internal class Program
+    internal class Client
     {
         static void Main(string[] args)
         {
-            // server: start
-            const string ip = "127.0.0.1";
+            Console.WriteLine("This is client.");
+            const string ip = "127.0.0.1"; // this is client's ip and port
             const int port = 8082;
-
-            var udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-
+            EndPoint udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port); // client's endpoint
+            EndPoint serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8081); // server's endpoint
             var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             udpSocket.Bind(udpEndPoint);
+            Console.WriteLine("Client started successfully!");
 
             while (true)
             {
-
-                var message = Console.ReadLine();
-                var serverEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8081);
-                udpSocket.SendTo(Encoding.UTF8.GetBytes(message), serverEndPoint);
-
-                var buffer = new byte[4096];
+                var buffer = new byte[4096]; // Инициализация буфера, размера сообщения и данных
                 var size = 0;
                 var data = new StringBuilder();
-                EndPoint senderEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8081);
+
+                var message = Console.ReadLine();
+                udpSocket.SendTo(Encoding.UTF8.GetBytes(message), serverEndPoint);
 
                 do
                 {
-                    size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
+                    size = udpSocket.ReceiveFrom(buffer, ref serverEndPoint);
                     data.Append(Encoding.UTF8.GetString(buffer));
                 }
                 while (udpSocket.Available > 0);
 
                 Console.WriteLine(data);
-                //Console.ReadLine();
             }
+            // TODO: Закрытие сокета
         }
     }
 }

@@ -90,10 +90,11 @@ namespace IS_Arch
                 int size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
                 string data = Encoding.UTF8.GetString(buffer, 0, size);
                 string server_answer = "";
+                byte[] responseBuffer;
 
                 if (TypeCheck.IntCheckBool(data))
                 {
-                    Console.WriteLine("Received: " + data);
+                    Console.WriteLine("Client choice: " + data); // Вывод выбора пользователя в меню.
                     switch (Convert.ToInt32(data))
                     {
                         case 1: // Вывод всех записей на экран
@@ -101,8 +102,20 @@ namespace IS_Arch
                             server_answer = ConsoleOutputAll(Students);
                             break;
                         case 2: // Вывод записи по номеру
-                            // Do something for menu2
-                            server_answer = "case 2";
+                            server_answer = "Введите ID";
+                            responseBuffer = Encoding.UTF8.GetBytes(server_answer);
+                            udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint); // Отправляем клиенту сообщение
+                            size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
+                            data = Encoding.UTF8.GetString(buffer, 0, size);
+
+                            if (TypeCheck.IntCheckBool(data))
+                            {
+                                server_answer = OutputByID(Students, Convert.ToInt32(data));
+                            }
+                            else
+                            {
+                                server_answer = "Неверный формат ID";
+                            }
                             break;
                         case 3: // Запись данных в файл
                             
@@ -117,13 +130,12 @@ namespace IS_Arch
                             server_answer = "Incorrect input. Please press the button from 1 to 5.";
                             break;
                     }
-
-                    byte[] responseBuffer = Encoding.UTF8.GetBytes(server_answer);
+                    responseBuffer = Encoding.UTF8.GetBytes(server_answer);
                     udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
                 }
                 else
                 {
-                    byte[] responseBuffer = Encoding.UTF8.GetBytes("Invalid data. Try again.");
+                    responseBuffer = Encoding.UTF8.GetBytes("Invalid data. Try again.");
                     udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
                     Console.WriteLine("Received invalid data");
                 }
