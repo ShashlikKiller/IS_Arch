@@ -70,7 +70,7 @@ namespace IS_Arch
 
                 var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 udpSocket.Bind(udpEndPoint);
-                StartReceiving(udpSocket, Students);
+                StartReceiving(udpSocket, Students, path);
             }
             catch (Exception e)
             {
@@ -80,34 +80,35 @@ namespace IS_Arch
             #endregion
         }
 
-        private static async void StartReceiving(Socket udpSocket, List<Student> Students)
+        private static async void StartReceiving(Socket udpSocket, List<Student> Students, string path)
         {
-            byte[] buffer = new byte[256];
-            EndPoint senderEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            byte[] buffer = new byte[256]; // Буффер сообщения клиента
+            byte[] responseBuffer; // Буффер сообщения сервера
+            string server_answer; // Переменная ответа сервера клиенту
+            int size; // Размер полученного сообщения от клиента
+            string data; // Данные сообщения от клиента
+            EndPoint senderEndPoint = new IPEndPoint(IPAddress.Any, 0); // Эндпоинт клиента(отправителя сообщений)
             Console.WriteLine("Server started successfully!");
             while (true)
             {
-                int size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
-                string data = Encoding.UTF8.GetString(buffer, 0, size);
-                string server_answer = "";
-                byte[] responseBuffer;
+                server_answer = "";
+                size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
+                data = Encoding.UTF8.GetString(buffer, 0, size);
 
                 if (TypeCheck.IntCheckBool(data))
                 {
                     Console.WriteLine("Client choice: " + data); // Вывод выбора пользователя в меню.
                     switch (Convert.ToInt32(data))
                     {
-                        case 1: // Вывод всех записей на экран
-                            
+                        case 1: // Вывод всех записей на экран +
                             server_answer = ConsoleOutputAll(Students);
                             break;
-                        case 2: // Вывод записи по номеру
+                        case 2: // Вывод записи по номеру +
                             server_answer = "Введите ID";
                             responseBuffer = Encoding.UTF8.GetBytes(server_answer);
                             udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint); // Отправляем клиенту сообщение
                             size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
                             data = Encoding.UTF8.GetString(buffer, 0, size);
-
                             if (TypeCheck.IntCheckBool(data))
                             {
                                 server_answer = OutputByID(Students, Convert.ToInt32(data));
@@ -117,8 +118,8 @@ namespace IS_Arch
                                 server_answer = "Неверный формат ID";
                             }
                             break;
-                        case 3: // Запись данных в файл
-                            
+                        case 3: // Запись данных в файл +
+                            server_answer = SaveRecords(Students, path);
                             break;
                         case 4: // Удалить запись по номеру
                             
@@ -142,14 +143,6 @@ namespace IS_Arch
             }
 
             // server: end
-
-
-            
-            //bool activeapp = true; // Это можно убрать, оставив в while просто true.
-            //while (activeapp)
-            //{
-             //   MenuCall(Students, path);
-            //}
         }
 
         //public void StartMessageLoop(Socket UDPSocket)
@@ -165,19 +158,28 @@ namespace IS_Arch
         //    }
         //}
 
-        public static void SaveRecords(List<Student> Students, string pathtofile)
+        public static string SaveRecords(List<Student> Students, string pathtofile) // TODO: Вынести в отдельный класс
         {
-            using (var swriter = new StreamWriter(pathtofile))
-            using (var csvwriter = new CsvWriter(swriter, CultureInfo.InvariantCulture))
+            string answer;
+            try
             {
-                csvwriter.WriteRecords(Students);
+                using (var swriter = new StreamWriter(pathtofile))
+                using (var csvwriter = new CsvWriter(swriter, CultureInfo.InvariantCulture))
+                {
+                    csvwriter.WriteRecords(Students);
+                }
+                answer = " \n Data successfully saved. \n";
             }
-            Console.WriteLine("\n Данные успешно сохранены. \n");
+            catch (Exception ex)
+            {
+                answer = ex.ToString();
+            }
+            return answer;
         }
 
         public static void MenuCall(List<Student> Students, string path)
         {
-            MenuText();
+            //MenuText();
             switch (Console.ReadKey(true).Key)
             {
                 case ConsoleKey.D1: // Вывод всех записей на экран

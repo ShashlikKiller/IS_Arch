@@ -29,18 +29,7 @@ namespace IS_Arch.BackEnd
             }
             return "No students with this ID were found.";
         }
-        public static string MenuText()
-        {
-            string answer = "";
-            answer += " Выберите то, что вы хотите сделать, и нажмите соответствующую кнопку :\n";
-            answer += "   1. Вывод всех данных на экран\n";
-            answer += "   2. Вывод карточки студента по идентификатору\n";
-            answer += "   3. Сохранение всех записей в файл\n";
-            answer += "   4. Удалить запись по ID студента\n";
-            answer += "   5. Добавить новую запись\n";
-            answer += "   Esc. Закрытие\n";
-            return answer;
-        }
+        
         public static string ConsoleOutputAll(List<Student> Students)
         {
             string answer = "";
