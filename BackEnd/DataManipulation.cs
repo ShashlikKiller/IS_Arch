@@ -72,11 +72,9 @@ namespace IS_Arch.BackEnd
         public static string ConsoleOutputSingle(Student student)
         {
             string answer = "";
-            //answer += "-----------------------------------------------------------------";
             answer += $"\n Student ID: {student.Student_id} \n";
             answer += $" Name: {student.Name} {student.Surname}\n";
             answer += $" Group: {student.Group}, Still learning - {student.LearningStatus}\n";
-            //answer += "-----------------------------------------------------------------";
             return answer;
         }
     }

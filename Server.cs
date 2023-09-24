@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using static IS_Arch.BackEnd.DataManipulation;
 using CsvHelper.Configuration;
 using CsvHelper;
+using static IS_Arch.BackEnd.StudentBuilder;
 
 namespace IS_Arch
 {
@@ -81,10 +82,7 @@ namespace IS_Arch
 
         private static async void StartReceiving(Socket udpSocket, List<Student> Students, string path)
         {
-            //byte[] buffer = new byte[256]; // Буффер сообщения клиента
-            //byte[] responseBuffer; // Буффер сообщения сервера
             string server_answer; // Переменная ответа сервера клиенту
-            //int size; // Размер полученного сообщения от клиента
             string data; // Данные сообщения от клиента
             //const string ip = "127.0.0.1"; // this is client's ip and port
             //const int port = 8082;
@@ -129,17 +127,32 @@ namespace IS_Arch
                             }
                             else
                             {
-                                server_answer = "Неверный формат ID" + BackToMenu;
+                                server_answer = "Неверный формат ID";
                             }
                             break;
                         case 5: // Добавление новой записи
+                            Student varStudent = new Student();
+                            StudentBuild builder; // Используем паттерн строитель для создания новой сущности
+                            ConcreteBuilder studentBuilder = new ConcreteBuilder();
+                            SendData(udpSocket, senderEndPoint, " Введите имя:\n");
+                            studentBuilder.AddName(ReceiveData(udpSocket, senderEndPoint), varStudent);
+                            SendData(udpSocket, senderEndPoint, " Введите фамилию:\n");
+                            studentBuilder.AddSurname(ReceiveData(udpSocket, senderEndPoint), varStudent);
+                            SendData(udpSocket, senderEndPoint, " Введите название группы:\n");
+                            studentBuilder.AddGroup(ReceiveData(udpSocket, senderEndPoint), varStudent);
+                            SendData(udpSocket, senderEndPoint, " Введите ID студента: \n"); // TODO: IntCheck
+                            //studentBuilder.AddID(ReceiveData(udpSocket, senderEndPoint), varStudent);
+                            SendData(udpSocket, senderEndPoint, " Введите статус обучения (1 - Да, 2 - Нет):\n"); // TODO:
+                            // BoolCheck BIGWARNING BIGWARNING BIGWARNING
+                            //studentBuilder.AddLearningStatus(ReceiveData(udpSocket, senderEndPoint), varStudent);
 
+                            Students.Add(studentBuilder.GetResult(varStudent));
                             break;
                         default:
                             server_answer = "Incorrect input. Please press the button from 1 to 5.";
                             break;
                     }
-                    SendData(udpSocket, senderEndPoint, server_answer);
+                    SendData(udpSocket, senderEndPoint, server_answer + BackToMenu);
                 }
                 else
                 {
