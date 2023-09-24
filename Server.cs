@@ -58,7 +58,6 @@ namespace IS_Arch
                 else Students = new List<Student>();
             }
             #endregion
-
             #region server initialization
             // server: start
             const string ip = "127.0.0.1";
@@ -82,18 +81,19 @@ namespace IS_Arch
 
         private static async void StartReceiving(Socket udpSocket, List<Student> Students, string path)
         {
-            byte[] buffer = new byte[256]; // Буффер сообщения клиента
-            byte[] responseBuffer; // Буффер сообщения сервера
+            //byte[] buffer = new byte[256]; // Буффер сообщения клиента
+            //byte[] responseBuffer; // Буффер сообщения сервера
             string server_answer; // Переменная ответа сервера клиенту
-            int size; // Размер полученного сообщения от клиента
+            //int size; // Размер полученного сообщения от клиента
             string data; // Данные сообщения от клиента
-            EndPoint senderEndPoint = new IPEndPoint(IPAddress.Any, 0); // Эндпоинт клиента(отправителя сообщений)
+            //const string ip = "127.0.0.1"; // this is client's ip and port
+            //const int port = 8082;
+            EndPoint senderEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8082); // Эндпоинт клиента(отправителя сообщений)
             Console.WriteLine("Server started successfully!");
             while (true)
             {
                 server_answer = "";
-                size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
-                data = Encoding.UTF8.GetString(buffer, 0, size); // TODO: Вынести в отдельный метод data = statis string ReceiveMessage(...)
+                data = ReceiveData(udpSocket, senderEndPoint); // TODO: Вынести в отдельный метод data = statis string ReceiveMessage(...)
 
                 if (TypeCheck.IntCheckBool(data))
                 {
@@ -120,7 +120,17 @@ namespace IS_Arch
                             server_answer = SaveRecords(Students, path);
                             break;
                         case 4: // Удалить запись по номеру
-
+                            server_answer = "Введите ID";
+                            SendData(udpSocket, senderEndPoint, server_answer); // Отправляем клиенту сообщение
+                            data = ReceiveData(udpSocket, senderEndPoint);
+                            if (TypeCheck.IntCheckBool(data))
+                            {
+                                server_answer = DeleteRecord(Students, Convert.ToInt32(data));
+                            }
+                            else
+                            {
+                                server_answer = "Неверный формат ID" + BackToMenu;
+                            }
                             break;
                         case 5: // Добавление новой записи
 
@@ -137,9 +147,10 @@ namespace IS_Arch
                     Console.WriteLine("Received invalid data");
                 }
             }
-
             // server: end
         }
+
+        private static string BackToMenu = "Вы возвращены в меню. Выберите пункт от 1 до 5.\n";
 
         private static string ReceiveData(Socket udpSocket, EndPoint senderEndPoint)
         {

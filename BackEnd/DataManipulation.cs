@@ -56,18 +56,17 @@ namespace IS_Arch.BackEnd
             Students.Add(varstudent);
         }
 
-        public static void DeleteRecord(List<Student> Students)
+        public static string DeleteRecord(List<Student> Students, int delete_id)
         {
-            Console.WriteLine(" Введите индекс записи, которую хотите удалить.");
-            int delete_id = int.Parse(Console.ReadLine());
             foreach (Student item in Students)
             {
                 if (item.Student_id == delete_id)
                 {
                     Students.Remove(item);
-                    break;
+                    return "The deletion was successful.\n";
                 }
             }
+            return "Something went wrong.\n";
         }
 
         public static string ConsoleOutputSingle(Student student)

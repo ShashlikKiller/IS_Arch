@@ -37,7 +37,6 @@ namespace Client
                     data.Append(Encoding.UTF8.GetString(buffer));
                 }
                 while (udpSocket.Available > 0);
-
                 Console.WriteLine(data);
             }
             // TODO: Закрытие сокета

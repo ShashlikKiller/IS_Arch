@@ -59,7 +59,7 @@ namespace IS_Arch.BackEnd
             }
         }
 
-        public static uint IntCheck()
+        public static uint IntCheck() // че за фигня?
         {
             uint varint = 0;
             bool exit = false;
@@ -72,7 +72,7 @@ namespace IS_Arch.BackEnd
                 }
                 catch
                 {
-                    Console.WriteLine("Ошибка ввода: вы должны вводить целое положительное число. Попробуйте еще раз.");
+                    //Console.WriteLine("Ошибка ввода: вы должны вводить целое положительное число. Попробуйте еще раз.");
                 }
                 finally
                 {
