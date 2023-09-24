@@ -93,7 +93,7 @@ namespace IS_Arch
             {
                 server_answer = "";
                 size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
-                data = Encoding.UTF8.GetString(buffer, 0, size);
+                data = Encoding.UTF8.GetString(buffer, 0, size); // TODO: Вынести в отдельный метод data = statis string ReceiveMessage(...)
 
                 if (TypeCheck.IntCheckBool(data))
                 {
@@ -105,10 +105,8 @@ namespace IS_Arch
                             break;
                         case 2: // Вывод записи по номеру +
                             server_answer = "Введите ID";
-                            responseBuffer = Encoding.UTF8.GetBytes(server_answer);
-                            udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint); // Отправляем клиенту сообщение
-                            size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
-                            data = Encoding.UTF8.GetString(buffer, 0, size);
+                            SendData(udpSocket, senderEndPoint, server_answer); // Отправляем клиенту сообщение
+                            data = ReceiveData(udpSocket, senderEndPoint);
                             if (TypeCheck.IntCheckBool(data))
                             {
                                 server_answer = OutputByID(Students, Convert.ToInt32(data));
@@ -122,27 +120,42 @@ namespace IS_Arch
                             server_answer = SaveRecords(Students, path);
                             break;
                         case 4: // Удалить запись по номеру
-                            
+
                             break;
                         case 5: // Добавление новой записи
-                            
+
                             break;
                         default:
                             server_answer = "Incorrect input. Please press the button from 1 to 5.";
                             break;
                     }
-                    responseBuffer = Encoding.UTF8.GetBytes(server_answer);
-                    udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
+                    SendData(udpSocket, senderEndPoint, server_answer);
                 }
                 else
                 {
-                    responseBuffer = Encoding.UTF8.GetBytes("Invalid data. Try again.");
-                    udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
+                    SendData(udpSocket, senderEndPoint, "Invalid data. Try again.");
                     Console.WriteLine("Received invalid data");
                 }
             }
 
             // server: end
+        }
+
+        private static string ReceiveData(Socket udpSocket, EndPoint senderEndPoint)
+        {
+            string data;
+            int size;
+            byte[] buffer = new byte[256];
+            size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
+            data = Encoding.UTF8.GetString(buffer, 0, size);
+            return data;
+        }
+
+        private static void SendData(Socket udpSocket, EndPoint senderEndPoint, string server_answer)
+        {
+            byte[] responseBuffer;
+            responseBuffer = Encoding.UTF8.GetBytes(server_answer);
+            udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
         }
 
         //public void StartMessageLoop(Socket UDPSocket)
@@ -175,36 +188,6 @@ namespace IS_Arch
                 answer = ex.ToString();
             }
             return answer;
-        }
-
-        public static void MenuCall(List<Student> Students, string path)
-        {
-            //MenuText();
-            switch (Console.ReadKey(true).Key)
-            {
-                case ConsoleKey.D1: // Вывод всех записей на экран
-                    Console.WriteLine("\n Список студентов:\n");
-                    ConsoleOutputAll(Students);
-                    break;
-                case ConsoleKey.D2: // Вывод записи по номеру
-                    //OutputByID(Students);
-                    break;
-                case ConsoleKey.D3: // Запись данных в файл
-                    SaveRecords(Students, path);
-                    break;
-                case ConsoleKey.D4: // Удалить запись по индексу
-                    DeleteRecord(Students);
-                    break;
-                case ConsoleKey.D5: // Добавление новой записи
-                    AddNewRecord(Students);
-                    break;
-                case ConsoleKey.Escape: // Закрытие приложения
-                    Environment.Exit(0);
-                    break;
-                default:
-                    Console.WriteLine(" Нажмите конкретную кнопку от 1 до 5 или Esc для выхода из приложения.");
-                    break;
-            }
         }
     }
 }

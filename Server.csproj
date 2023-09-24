@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="BackEnd\DataManipulation.cs" />
     <Compile Include="BackEnd\Student.cs" />
+    <Compile Include="BackEnd\StudentBuilder.cs" />
     <Compile Include="BackEnd\TypeCheck.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
