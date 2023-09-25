@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 using static IS_Arch.BackEnd.DataManipulation;
 using CsvHelper.Configuration;
 using CsvHelper;
@@ -29,6 +30,7 @@ namespace IS_Arch
     {
         static void Main(string[] args)
         {
+            Logger logger = LogManager.GetCurrentClassLogger();
             Console.WriteLine("This is server.");
             #region database
             // database: start
@@ -70,7 +72,7 @@ namespace IS_Arch
 
                 var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 udpSocket.Bind(udpEndPoint);
-                StartReceiving(udpSocket, Students, path);
+                StartReceiving(udpSocket, Students, path, logger);
             }
             catch (Exception e)
             {
@@ -80,13 +82,14 @@ namespace IS_Arch
             #endregion
         }
 
-        private static async void StartReceiving(Socket udpSocket, List<Student> Students, string path)
+        private static async void StartReceiving(Socket udpSocket, List<Student> Students, string path, Logger logger)
         {
             string server_answer; // Переменная ответа сервера клиенту
             string data; // Данные сообщения от клиента
             //const string ip = "127.0.0.1"; // this is client's ip and port
             //const int port = 8082;
             EndPoint senderEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8082); // Эндпоинт клиента(отправителя сообщений)
+            logger.Info("Server started at" + DateTime.Now);
             Console.WriteLine("Server started successfully!");
             while (true)
             {
@@ -96,6 +99,7 @@ namespace IS_Arch
                 if (TypeCheck.IntCheckBool(data))
                 {
                     Console.WriteLine("Client choice: " + data); // Вывод выбора пользователя в меню.
+                    logger.Info("Client choice:" + data);
                     switch (Convert.ToInt32(data))
                     {
                         case 1: // Вывод всех записей на экран +
@@ -132,7 +136,7 @@ namespace IS_Arch
                             break;
                         case 5: // Добавление новой записи
                             Student varStudent = new Student();
-                            StudentBuild builder; // Используем паттерн строитель для создания новой сущности
+                            //StudentBuild builder; // Используем паттерн строитель для создания новой сущности
                             ConcreteBuilder studentBuilder = new ConcreteBuilder();
                             SendData(udpSocket, senderEndPoint, " Введите имя:\n");
                             studentBuilder.AddName(ReceiveData(udpSocket, senderEndPoint), varStudent);
@@ -140,16 +144,37 @@ namespace IS_Arch
                             studentBuilder.AddSurname(ReceiveData(udpSocket, senderEndPoint), varStudent);
                             SendData(udpSocket, senderEndPoint, " Введите название группы:\n");
                             studentBuilder.AddGroup(ReceiveData(udpSocket, senderEndPoint), varStudent);
-                            SendData(udpSocket, senderEndPoint, " Введите ID студента: \n"); // TODO: IntCheck
-                            //studentBuilder.AddID(ReceiveData(udpSocket, senderEndPoint), varStudent);
-                            SendData(udpSocket, senderEndPoint, " Введите статус обучения (1 - Да, 2 - Нет):\n"); // TODO:
-                            // BoolCheck BIGWARNING BIGWARNING BIGWARNING
-                            //studentBuilder.AddLearningStatus(ReceiveData(udpSocket, senderEndPoint), varStudent);
-
+                            bool exit = false;
+                            while (!exit)
+                            {
+                                SendData(udpSocket, senderEndPoint, " Введите ID студента: \n"); // TODO: IntCheck
+                                string newid = ReceiveData(udpSocket, senderEndPoint);
+                                if (TypeCheck.IntCheckBool(newid))
+                                {
+                                    studentBuilder.AddID(Convert.ToUInt32(newid), varStudent);
+                                    exit = true;
+                                }
+                                else SendData(udpSocket, senderEndPoint, "Invalid ID. Try again.");
+                            }
+                            exit = false;
+                            while (!exit)
+                            {
+                                SendData(udpSocket, senderEndPoint, " Введите статус обучения (1 - Да, 2 - Нет):\n"); // TODO:
+                                string newbool = ReceiveData(udpSocket, senderEndPoint);
+                                if (TypeCheck.BoolCheck(newbool))
+                                {
+                                    studentBuilder.AddLearningStatus(Convert.ToBoolean(ReceiveData(udpSocket, senderEndPoint)), varStudent);
+                                    exit = true;
+                                }
+                                else SendData(udpSocket, senderEndPoint, "Invalid BOOL. Try again.");
+                            }
                             Students.Add(studentBuilder.GetResult(varStudent));
+                            server_answer = "";
+                            logger.Info("New user was added.");
                             break;
                         default:
                             server_answer = "Incorrect input. Please press the button from 1 to 5.";
+                            logger.Error("Incorrect user input");
                             break;
                     }
                     SendData(udpSocket, senderEndPoint, server_answer + BackToMenu);
@@ -157,6 +182,7 @@ namespace IS_Arch
                 else
                 {
                     SendData(udpSocket, senderEndPoint, "Invalid data. Try again.");
+                    logger.Error("Incorrect user input");
                     Console.WriteLine("Received invalid data");
                 }
             }

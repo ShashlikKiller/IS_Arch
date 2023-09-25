@@ -44,6 +44,19 @@ namespace IS_Arch.BackEnd
             if (varbool == 1) return true;
             return false;
         }
+        public static bool BoolCheck(string sendedbool)
+        {
+            bool varbool;
+            try
+            {
+                varbool = bool.Parse(sendedbool);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         public static bool IntCheckBool(string numb)
         {

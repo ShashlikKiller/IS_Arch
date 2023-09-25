@@ -40,22 +40,6 @@ namespace IS_Arch.BackEnd
             return answer;
         }
 
-        public static void AddNewRecord(List<Student> Students)
-        {
-            Console.WriteLine(" Введите имя:");
-            string varname = TypeCheck.StringCheck();
-            Console.WriteLine(" Введите фамилию: ");
-            string varsurname = TypeCheck.StringCheck();
-            Console.WriteLine(" Введите название группы: ");
-            string vargroup = TypeCheck.StringCheck();
-            Console.WriteLine(" Введите ID студента: ");
-            uint varstudent_id = TypeCheck.IntCheck(); // Сделать проверку на дурака
-            Console.WriteLine(" Введите статус обучения (1 - Да, 2 - Нет): ");
-            bool varlearningstatus = TypeCheck.BoolCheck();
-            Student varstudent = new Student(varname, varsurname, vargroup, varstudent_id, varlearningstatus);
-            Students.Add(varstudent);
-        }
-
         public static string DeleteRecord(List<Student> Students, int delete_id)
         {
             foreach (Student item in Students)
