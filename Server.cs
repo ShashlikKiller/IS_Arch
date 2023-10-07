@@ -13,6 +13,7 @@ using static IS_Arch.BackEnd.DataManipulation;
 using CsvHelper.Configuration;
 using CsvHelper;
 using static IS_Arch.BackEnd.StudentBuilder;
+using static IS_Arch.BackEnd.ServerCommandsAsync;
 
 namespace IS_Arch
 {
@@ -82,19 +83,19 @@ namespace IS_Arch
             #endregion
         }
 
-        private static async void StartReceiving(Socket udpSocket, List<Student> Students, string path, Logger logger)
+        private static async Task StartReceiving(Socket udpSocket, List<Student> Students, string path, Logger logger)
         {
             string server_answer; // Переменная ответа сервера клиенту
             string data; // Данные сообщения от клиента
-            //const string ip = "127.0.0.1"; // this is client's ip and port
-            //const int port = 8082;
-            EndPoint senderEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8082); // Эндпоинт клиента(отправителя сообщений)
+            IPAddress clientIP = IPAddress.Parse("127.0.0.1"); // this is client's ip and port
+            const int clientPort = 8082;
+            EndPoint senderEndPoint = new IPEndPoint(clientIP, clientPort); // Эндпоинт клиента(отправителя сообщений)
             logger.Info("Server started at" + DateTime.Now);
             Console.WriteLine("Server started successfully!");
             while (true)
             {
                 server_answer = "";
-                data = ReceiveData(udpSocket, senderEndPoint); // TODO: Вынести в отдельный метод data = statis string ReceiveMessage(...)
+                data = ReceiveData(udpSocket, senderEndPoint);
 
                 if (TypeCheck.IntCheckBool(data))
                 {
@@ -102,142 +103,37 @@ namespace IS_Arch
                     logger.Info("Client choice:" + data);
                     switch (Convert.ToInt32(data))
                     {
-                        case 1: // Вывод всех записей на экран +
-                            server_answer = ConsoleOutputAll(Students);
+                        case 1: // Вывод всех записей на экран 
+                             server_answer = case1(Students).Result;
                             break;
-                        case 2: // Вывод записи по номеру +
-                            server_answer = "Введите ID";
-                            SendData(udpSocket, senderEndPoint, server_answer); // Отправляем клиенту сообщение
-                            data = ReceiveData(udpSocket, senderEndPoint);
-                            if (TypeCheck.IntCheckBool(data))
-                            {
-                                server_answer = OutputByID(Students, Convert.ToInt32(data));
-                            }
-                            else
-                            {
-                                server_answer = "Неверный формат ID";
-                            }
+                        case 2: // Вывод записи по номеру 
+                             server_answer = case2(udpSocket, senderEndPoint, Students).Result;
                             break;
-                        case 3: // Запись данных в файл +
-                            server_answer = SaveRecords(Students, path);
+                        case 3: // Запись данных в файл 
+                             server_answer = case3(Students, path).Result;
                             break;
                         case 4: // Удалить запись по номеру
-                            server_answer = "Введите ID";
-                            SendData(udpSocket, senderEndPoint, server_answer); // Отправляем клиенту сообщение
-                            data = ReceiveData(udpSocket, senderEndPoint);
-                            if (TypeCheck.IntCheckBool(data))
-                            {
-                                server_answer = DeleteRecord(Students, Convert.ToInt32(data));
-                            }
-                            else
-                            {
-                                server_answer = "Неверный формат ID";
-                            }
+                             server_answer = case4(udpSocket, senderEndPoint, Students).Result;
                             break;
                         case 5: // Добавление новой записи
-                            Student varStudent = new Student();
-                            //StudentBuild builder; // Используем паттерн строитель для создания новой сущности
-                            ConcreteBuilder studentBuilder = new ConcreteBuilder();
-                            SendData(udpSocket, senderEndPoint, " Введите имя:\n");
-                            studentBuilder.AddName(ReceiveData(udpSocket, senderEndPoint), varStudent);
-                            SendData(udpSocket, senderEndPoint, " Введите фамилию:\n");
-                            studentBuilder.AddSurname(ReceiveData(udpSocket, senderEndPoint), varStudent);
-                            SendData(udpSocket, senderEndPoint, " Введите название группы:\n");
-                            studentBuilder.AddGroup(ReceiveData(udpSocket, senderEndPoint), varStudent);
-                            bool exit = false;
-                            while (!exit)
-                            {
-                                SendData(udpSocket, senderEndPoint, " Введите ID студента: \n"); // TODO: IntCheck
-                                string newid = ReceiveData(udpSocket, senderEndPoint);
-                                if (TypeCheck.IntCheckBool(newid))
-                                {
-                                    studentBuilder.AddID(Convert.ToUInt32(newid), varStudent);
-                                    exit = true;
-                                }
-                                else SendData(udpSocket, senderEndPoint, "Invalid ID. Try again.");
-                            }
-                            exit = false;
-                            while (!exit)
-                            {
-                                SendData(udpSocket, senderEndPoint, " Введите статус обучения (1 - Да, 2 - Нет):\n"); // TODO:
-                                string newbool = ReceiveData(udpSocket, senderEndPoint);
-                                if (TypeCheck.BoolCheck(newbool))
-                                {
-                                    studentBuilder.AddLearningStatus(Convert.ToBoolean(ReceiveData(udpSocket, senderEndPoint)), varStudent);
-                                    exit = true;
-                                }
-                                else SendData(udpSocket, senderEndPoint, "Invalid BOOL. Try again.");
-                            }
-                            Students.Add(studentBuilder.GetResult(varStudent));
-                            server_answer = "";
-                            logger.Info("New user was added.");
+                             server_answer = case5(udpSocket, senderEndPoint, Students).Result;
                             break;
                         default:
                             server_answer = "Incorrect input. Please press the button from 1 to 5.";
                             logger.Error("Incorrect user input");
                             break;
                     }
-                    SendData(udpSocket, senderEndPoint, server_answer + BackToMenu);
+                    SendDataAsync(udpSocket, senderEndPoint, server_answer + BackToMenu);
                 }
                 else
                 {
-                    SendData(udpSocket, senderEndPoint, "Invalid data. Try again.");
+                    SendDataAsync(udpSocket, senderEndPoint, "Invalid data. Try again.");
                     logger.Error("Incorrect user input");
                     Console.WriteLine("Received invalid data");
                 }
             }
-            // server: end
         }
 
         private static string BackToMenu = "Вы возвращены в меню. Выберите пункт от 1 до 5.\n";
-
-        private static string ReceiveData(Socket udpSocket, EndPoint senderEndPoint)
-        {
-            string data;
-            int size;
-            byte[] buffer = new byte[256];
-            size = udpSocket.ReceiveFrom(buffer, ref senderEndPoint);
-            data = Encoding.UTF8.GetString(buffer, 0, size);
-            return data;
-        }
-
-        private static void SendData(Socket udpSocket, EndPoint senderEndPoint, string server_answer)
-        {
-            byte[] responseBuffer;
-            responseBuffer = Encoding.UTF8.GetBytes(server_answer);
-            udpSocket.SendTo(responseBuffer, SocketFlags.None, senderEndPoint);
-        }
-
-        //public void StartMessageLoop(Socket UDPSocket)
-        //{
-        //    var e = SocketAs
-        //    _ = Task.Run(async () =>
-        //    {
-        //        SocketReceiveFromResult res;
-        //        while (true)
-        //        {
-        //            res = await UDPSocket.ReceiveAsync()
-        //        }
-        //    }
-        //}
-
-        public static string SaveRecords(List<Student> Students, string pathtofile) // TODO: Вынести в отдельный класс
-        {
-            string answer;
-            try
-            {
-                using (var swriter = new StreamWriter(pathtofile))
-                using (var csvwriter = new CsvWriter(swriter, CultureInfo.InvariantCulture))
-                {
-                    csvwriter.WriteRecords(Students);
-                }
-                answer = " \n Data successfully saved. \n";
-            }
-            catch (Exception ex)
-            {
-                answer = ex.ToString();
-            }
-            return answer;
-        }
     }
 }

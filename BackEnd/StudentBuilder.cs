@@ -9,7 +9,7 @@
             public abstract void AddGroup(string group, Student CurrentStudent);
             public abstract void AddID(uint id, Student CurrentStudent);
             public abstract void AddLearningStatus(bool learningstatus, Student CurrentStudent);
-            public abstract Student GetResult(Student CurrentStudent); // Собрать
+            public abstract Student GetResult(Student CurrentStudent);
         }
 
         public class Director

@@ -26,10 +26,13 @@ namespace Client
             while (true)
             {
                 var buffer = new byte[4096]; // Инициализация буфера, размера сообщения и данных
-                var size = 0;
+                int size;
                 var data = new StringBuilder();
-
-                var message = Console.ReadLine();
+                if (Console.ReadKey(true).Key == ConsoleKey.Escape)
+                {
+                    Environment.Exit(0);
+                }
+                string message = Console.ReadLine();
                 udpSocket.SendTo(Encoding.UTF8.GetBytes(message), serverEndPoint);
                 do
                 {

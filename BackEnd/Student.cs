@@ -1,6 +1,6 @@
 ﻿namespace IS_Arch.BackEnd
 {
-        internal class Student
+        public class Student
         {
             private string name;
             private string surname;
