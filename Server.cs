@@ -6,13 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using NLog;
-using static IS_Arch.BackEnd.DataManipulation;
 using CsvHelper.Configuration;
 using CsvHelper;
-using static IS_Arch.BackEnd.StudentBuilder;
 using static IS_Arch.BackEnd.ServerCommandsAsync;
 
 namespace IS_Arch
@@ -124,6 +121,7 @@ namespace IS_Arch
                             break;
                     }
                     SendDataAsync(udpSocket, senderEndPoint, server_answer + BackToMenu);
+                    logger.Info("server send: " + server_answer);
                 }
                 else
                 {
@@ -133,7 +131,6 @@ namespace IS_Arch
                 }
             }
         }
-
         private static string BackToMenu = "Вы возвращены в меню. Выберите пункт от 1 до 5.\n";
     }
 }

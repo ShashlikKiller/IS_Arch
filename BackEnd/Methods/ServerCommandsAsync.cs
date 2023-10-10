@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using static IS_Arch.BackEnd.DataManipulation;
 using static IS_Arch.BackEnd.StudentBuilder;
-using System.Runtime.InteropServices;
 
 namespace IS_Arch.BackEnd
 {
@@ -84,35 +83,35 @@ namespace IS_Arch.BackEnd
             ConcreteBuilder studentBuilder = new ConcreteBuilder();
             try // Почему try такой большой?
             {
-                SendDataAsync(udpSocket, senderEndPoint, " Enter the name:\n");
+                await SendDataAsync(udpSocket, senderEndPoint, " Enter the name:");
                 studentBuilder.AddName(ReceiveDataAsync(udpSocket, senderEndPoint).Result, varStudent); // TODO: посмотри что будент если senddata w/o await
-                SendDataAsync(udpSocket, senderEndPoint, " Enter the surname:\n");
+                await SendDataAsync(udpSocket, senderEndPoint, " Enter the surname:");
                 studentBuilder.AddSurname(ReceiveDataAsync(udpSocket, senderEndPoint).Result, varStudent);
-                SendDataAsync(udpSocket, senderEndPoint, " Enter the group:\n");
+                await SendDataAsync(udpSocket, senderEndPoint, " Enter the group:");
                 studentBuilder.AddGroup(ReceiveDataAsync(udpSocket, senderEndPoint).Result, varStudent);
                 bool exit = false;
                 while (!exit) // Вход на ввод ID студента (проверка на int)
                 {
-                    SendDataAsync(udpSocket, senderEndPoint, " Enter the ID \n");
+                    await SendDataAsync(udpSocket, senderEndPoint, " Enter the ID:");
                     string newid = await ReceiveDataAsync(udpSocket, senderEndPoint);
                     if (TypeCheck.IntCheckBool(newid))
                     {
                         await Task.Run(() => studentBuilder.AddID(Convert.ToUInt32(newid), varStudent));
                         exit = true;
                     }
-                    else SendDataAsync(udpSocket, senderEndPoint, "Invalid ID format. Try again.");
+                    else await SendDataAsync(udpSocket, senderEndPoint, "Invalid ID format. Try again.");
                 }
                 exit = false;
                 while (!exit) // Вход на ввод статуса обучения студента (проверка на bool)
                 {
-                    SendDataAsync(udpSocket, senderEndPoint, " Enter the student's learning status. (1 = True, 2 = False):\n");
+                    await SendDataAsync(udpSocket, senderEndPoint, " Enter the student's learning status. (1 = True, 2 = False):\n");
                     string newbool = await ReceiveDataAsync(udpSocket, senderEndPoint);
                     if (TypeCheck.BoolCheck(newbool))
                     {
                         await Task.Run(() => studentBuilder.AddLearningStatus(Convert.ToBoolean(ReceiveData(udpSocket, senderEndPoint)), varStudent));
                         exit = true;
                     }
-                    else SendData(udpSocket, senderEndPoint, "Invalid BOOL format. Try again.");
+                    else SendDataAsync(udpSocket, senderEndPoint, "Invalid BOOL format. Try again."); // Тут ошибка из-за парса постоянно 
                 }
                 Students.Add(studentBuilder.GetResult(varStudent));
                 return "Success. Student added.\n";
