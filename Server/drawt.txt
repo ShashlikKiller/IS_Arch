@@ -1,0 +1,28 @@
+﻿            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                ShouldUseConstructorParameters = type => false // Передача библиотеке разрешение на
+                                                               // присваивание полей без конструктора
+            };
+            string path; // переменная пути до csv файла
+            try
+            {
+                path = Environment.CurrentDirectory + "\\database.csv"; // Создание пути для .csv файла
+            }
+            catch
+            {
+                Console.WriteLine(" Файл по данному адресу отсутствует. Введите прямой адрес:");
+                path = Console.ReadLine();
+            }
+            List<Student> Students;
+            using (var reader = new StreamReader(path))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                IEnumerable<Student> Records = csv.GetRecords<Student>(); // Базовый интерфейс для всех
+                if (Records != null)                                      // неуниверсальных коллекций
+                {
+                    Students = Records.ToList();
+                }
+                else Students = new List<Student>();
+            }
+
+            - Метод, берущий данные из csv файла (убран по причине замены хранения данных в базе данных вместо csv файла)

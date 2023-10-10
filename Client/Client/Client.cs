@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using static Client.Methods.ConsoleOutput;
 
 namespace Client
 {
@@ -13,6 +9,7 @@ namespace Client
     {
         static void Main(string[] args)
         {
+            #region client initialization
             Console.WriteLine("This is client.");
             const string ip = "127.0.0.1"; // this is client's ip and port
             const int port = 8082;
@@ -22,7 +19,8 @@ namespace Client
             udpSocket.Bind(udpEndPoint);
             Console.WriteLine("Client started successfully!");
             Console.WriteLine(MenuText());
-
+            #endregion
+            #region working with server
             while (true)
             {
                 var buffer = new byte[4096]; // Инициализация буфера, размера сообщения и данных
@@ -43,6 +41,21 @@ namespace Client
                 Console.WriteLine(data);
             }
             // TODO: Закрытие сокета
+            #endregion
+        }
+
+        public static string MenuText()
+        {
+            string answer = "";
+            answer 
+            += " Выберите то, что вы хотите сделать, и нажмите соответствующую кнопку :\n"
+            + "   1. Вывод всех данных на экран\n"
+            + "   2. Вывод карточки студента по идентификатору\n"
+            + "   3. Сохранение всех записей в файл\n"
+            + "   4. Удалить запись по ID студента\n"
+            + "   5. Добавить новую запись\n"
+            + "   Esc. Закрытие\n";
+            return answer;
         }
     }
 }

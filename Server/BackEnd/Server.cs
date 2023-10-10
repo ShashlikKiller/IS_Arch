@@ -1,16 +1,13 @@
 ﻿using IS_Arch.BackEnd;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
 using NLog;
-using CsvHelper.Configuration;
-using CsvHelper;
 using static IS_Arch.BackEnd.ServerCommandsAsync;
+using IS_Arch.DataBase;
+using IS_Arch.DataBase.Models;
 
 namespace IS_Arch
 {
@@ -31,33 +28,10 @@ namespace IS_Arch
             Logger logger = LogManager.GetCurrentClassLogger();
             Console.WriteLine("This is server.");
             #region database
-            // database: start
-            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            using (var context = new StudentdbContext())
             {
-                ShouldUseConstructorParameters = type => false // Передача библиотеке разрешение на
-                                                               // присваивание полей без конструктора
-            };
-            string path; // переменная пути до csv файла
-            try
-            {
-                path = Environment.CurrentDirectory + "\\database.csv"; // Создание пути для .csv файла
-            }
-            catch
-            {
-                Console.WriteLine(" Файл по данному адресу отсутствует. Введите прямой адрес:");
-                path = Console.ReadLine();
-            }
-            List<Student> Students;
-            using (var reader = new StreamReader(path))
-            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-            {
-                IEnumerable<Student> Records = csv.GetRecords<Student>(); // Базовый интерфейс для всех
-                if (Records != null)                                      // неуниверсальных коллекций
-                {
-                    Students = Records.ToList();
-                }
-                else Students = new List<Student>();
-            }
+                // TODO: Здесь происходит вся работа.
+            }    
             #endregion
             #region server initialization
             // server: start

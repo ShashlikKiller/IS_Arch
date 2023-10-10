@@ -83,25 +83,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BackEnd\Methods\DataManipulation.cs" />
-    <Compile Include="BackEnd\Methods\ServerCommandsAsync.cs" />
-    <Compile Include="BackEnd\Model\Student.cs" />
-    <Compile Include="BackEnd\Model\StudentBuilder.cs" />
-    <Compile Include="BackEnd\Methods\TypeCheck.cs" />
-    <Compile Include="DataBase\StudentdbContext.cs" />
-    <Compile Include="Server.cs" />
+    <Compile Include="Server\BackEnd\Methods\DataManipulation.cs" />
+    <Compile Include="Server\BackEnd\Methods\ServerCommandsAsync.cs" />
+    <Compile Include="Server\DataBase\Models\Student.cs" />
+    <Compile Include="Server\BackEnd\Model\StudentBuilder.cs" />
+    <Compile Include="Server\BackEnd\Methods\TypeCheck.cs" />
+    <Compile Include="Server\DataBase\Models\Group.cs" />
+    <Compile Include="Server\DataBase\Models\LearningStatus.cs" />
+    <Compile Include="Server\DataBase\StudentdbContext.cs" />
+    <Compile Include="Server\BackEnd\Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <Content Include="NLog.config">
+    <Content Include="Server\drawt.txt" />
+    <None Include="Server\App.config" />
+    <Content Include="Server\Logger\NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="NLog.xsd">
+    <None Include="Server\Logger\NLog.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include="Server\packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
