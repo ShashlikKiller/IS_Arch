@@ -3,13 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Net;
-using System.Threading.Tasks;
 using NLog;
 using static IS_Arch.BackEnd.Methods.ServerCommandsAsync;
-using System.IO;
 using System.Linq;
-using System.Data.Entity.Core.Metadata.Edm;
 using IS_Arch.ServerProject.DataBase;
+using System.Threading.Tasks;
 
 namespace IS_Arch
 {
@@ -38,7 +36,6 @@ namespace IS_Arch
                 List<Student> Students = db.Students.ToList();
                 List<Group> Groups = db.Groups.ToList();
                 List<LearningStatus> LearningStatuses = db.LearningStatuses.ToList();
-
                 #region test
                 Console.Write("Students:\n");
                 foreach (Student student in Students)
@@ -61,22 +58,22 @@ namespace IS_Arch
                     var udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
                     var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                     udpSocket.Bind(udpEndPoint);
-                    StartReceiving(udpSocket, Students, logger, db);
+                    StartReceiving(udpSocket, Students, logger, db, Groups, LearningStatuses);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                     logger.Error($"Socket/EndPoint error: {e.Message}");
                 }
-
-                // TODO: Здесь происходит вся работа.
             }
         }
 
-        private static async Task StartReceiving(Socket udpSocket, List<Student> Students, Logger logger, dbEntities db) // ..Students, string path,..
+        private static async void StartReceiving(Socket udpSocket, List<Student> Students, Logger logger, dbEntities db, 
+            List<Group> Groups, List<LearningStatus> Statuses) // = task
         {
             string server_answer; // Переменная ответа сервера клиенту
             string data; // Данные сообщения от клиента
+            List<Student> newStudents = new List<Student>(); // Лист новых, добавленных во время работы приложения студентов
             IPAddress clientIP = IPAddress.Parse("127.0.0.1"); // this is client's ip and port
             const int clientPort = 8082;
             EndPoint senderEndPoint = new IPEndPoint(clientIP, clientPort); // Эндпоинт клиента(отправителя сообщений)
@@ -99,25 +96,25 @@ namespace IS_Arch
                             server_answer = case2(udpSocket, senderEndPoint, Students).Result;
                             break;
                         case 3: // Запись данных в файл 
-                            server_answer = case3(Students, db).Result;
+                            server_answer = case3(newStudents, db).Result;
                             break;
                         case 4: // Удалить запись по номеру
-                            server_answer = case4(udpSocket, senderEndPoint, Students).Result;
+                            server_answer = case4(udpSocket, senderEndPoint, Students, db).Result;
                             break;
                         case 5: // Добавление новой записи
-                            server_answer = case5(udpSocket, senderEndPoint, Students).Result;
+                            server_answer = case5(udpSocket, senderEndPoint, Students, newStudents, Groups, Statuses).Result;
                             break;
                         default:
                             server_answer = "Incorrect input. Please press the button from 1 to 5.";
                             logger.Error("Incorrect user input");
                             break;
                     }
-                    await SendDataAsync(udpSocket, senderEndPoint, server_answer + BackToMenu);
+                    SendDataAsync(udpSocket, senderEndPoint, server_answer + BackToMenu); // NO AWAIT
                     logger.Info($"server send: {server_answer}");
                 }
                 else
                 {
-                    await SendDataAsync(udpSocket, senderEndPoint, "Invalid data. Try again.");
+                    SendDataAsync(udpSocket, senderEndPoint, "Invalid data. Try again."); // NO AWAIT
                     logger.Error("Incorrect user input");
                     Console.WriteLine("Received invalid data");
                 }

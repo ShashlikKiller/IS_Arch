@@ -1,7 +1,5 @@
-﻿
-namespace IS_Arch.ServerProject.DataBase
+﻿namespace IS_Arch.ServerProject.DataBase
 {
-    using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     

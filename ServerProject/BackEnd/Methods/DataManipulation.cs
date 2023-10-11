@@ -22,7 +22,7 @@ namespace IS_Arch.BackEnd.Methods
                 if (CurrentStudent.id == searchID)
                 {
                     answer 
-                    += $" Student with ID = {searchID}\n"
+                    += $"Student with ID = {searchID}\n"
                     + ConsoleOutputSingle(CurrentStudent);
                     return answer;
                 }
@@ -40,13 +40,14 @@ namespace IS_Arch.BackEnd.Methods
             return answer;
         }
 
-        public static string DeleteRecord(List<Student> Students, int delete_id)
+        public static string DeleteRecord(List<Student> Students, dbEntities db, int delete_id)
         {
             foreach (Student item in Students)
             {
                 if (item.id == delete_id)
                 {
                     Students.Remove(item);
+                    db.Students.Remove(item);
                     return "The deletion was successful.\n";
                 }
             }
@@ -57,9 +58,9 @@ namespace IS_Arch.BackEnd.Methods
         {
             string answer = "";
             answer
-            += $"\n Student ID: {student.id} \n"
-            + $" Name: {student.name} {student.surname}\n"
-            + $" Group: {student.Group.name}, Still learning - {student.LearningStatus.status}\n";
+            += $"\nStudent ID: {student.id} \n"
+            + $"Name: {student.name} {student.surname}\n"
+            + $"Group: {student.Group.name}, Still learning - {student.LearningStatus.status}\n";
             return answer;
         }
 
