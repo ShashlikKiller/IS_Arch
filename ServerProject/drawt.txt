@@ -26,3 +26,23 @@
             }
 
             - Метод, берущий данные из csv файла (убран по причине замены хранения данных в базе данных вместо csv файла)
+
+
+             public static string SaveRecords(List<Student> Students, string pathtofile)
+        {
+            string answer;
+            try
+            {
+                using (var swriter = new StreamWriter(pathtofile))
+                using (var csvwriter = new CsvWriter(swriter, CultureInfo.InvariantCulture))
+                {
+                    csvwriter.WriteRecords(Students);
+                }
+                answer = " \nData successfully saved.\n";
+            }
+            catch (Exception ex)
+            {
+                answer = ex.ToString();
+            }
+            return answer;
+        }

@@ -1,15 +1,11 @@
-﻿using CsvHelper;
+﻿using IS_Arch.ServerProject.DataBase;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace IS_Arch.BackEnd
+namespace IS_Arch.BackEnd.Methods
 {
-    internal class DataManipulation
+    public class DataManipulation
     {
         // Разработанное приложение должно обеспечивать следующие возможности:
         //   1. Вывод всех записей на экран 
@@ -23,10 +19,11 @@ namespace IS_Arch.BackEnd
             for (int i = 0; i < Students.Count(); i++)
             {
                 Student CurrentStudent = Students.ElementAt(i);
-                if (CurrentStudent.Student_id == searchID)
+                if (CurrentStudent.id == searchID)
                 {
-                    answer += $" Student with ID = {searchID} \n";
-                    answer += ConsoleOutputSingle(CurrentStudent);
+                    answer 
+                    += $" Student with ID = {searchID}\n"
+                    + ConsoleOutputSingle(CurrentStudent);
                     return answer;
                 }
             }
@@ -47,7 +44,7 @@ namespace IS_Arch.BackEnd
         {
             foreach (Student item in Students)
             {
-                if (item.Student_id == delete_id)
+                if (item.id == delete_id)
                 {
                     Students.Remove(item);
                     return "The deletion was successful.\n";
@@ -59,29 +56,12 @@ namespace IS_Arch.BackEnd
         public static string ConsoleOutputSingle(Student student)
         {
             string answer = "";
-            answer += $"\n Student ID: {student.Student_id} \n";
-            answer += $" Name: {student.Name} {student.Surname}\n";
-            answer += $" Group: {student.Group}, Still learning - {student.LearningStatus}\n";
+            answer
+            += $"\n Student ID: {student.id} \n"
+            + $" Name: {student.name} {student.surname}\n"
+            + $" Group: {student.Group.name}, Still learning - {student.LearningStatus.status}\n";
             return answer;
         }
 
-        public static string SaveRecords(List<Student> Students, string pathtofile)
-        {
-            string answer;
-            try
-            {
-                using (var swriter = new StreamWriter(pathtofile))
-                using (var csvwriter = new CsvWriter(swriter, CultureInfo.InvariantCulture))
-                {
-                    csvwriter.WriteRecords(Students);
-                }
-                answer = " \n Data successfully saved. \n";
-            }
-            catch (Exception ex)
-            {
-                answer = ex.ToString();
-            }
-            return answer;
-        }
     }
 }
