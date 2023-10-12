@@ -30,25 +30,22 @@ namespace IS_Arch
 
             const string ip = "127.0.0.1";
             const int port = 8081; // У КЛИЕНТА И СЕРВЕРА РАЗНЫЕ ПОРТЫ! СВЯЗЬ ЧЕРЕЗ СЕРВЕР И КЛИЕНТ ЭНДПОИНТ
-
+            #region database init
             using (var db = new dbEntities())
             {
-                List<Student> Students = db.Students.ToList();
-                List<Group> Groups = db.Groups.ToList();
-                List<LearningStatus> LearningStatuses = db.LearningStatuses.ToList();
                 #region test
                 Console.Write("Students:\n");
-                foreach (Student student in Students)
+                foreach (Student student in db.Students)
                 {
                     Console.WriteLine($"student id: {student.id}, student's name: {student.name}, student's surname: {student.surname}, student's group:{student.group_id}, {student.Group.name}");
                 }
                 Console.Write("Groups:\n");
-                foreach (Group group in Groups)
+                foreach (Group group in db.Groups)
                 {
                     Console.WriteLine($"group id: {group.id}, group's name: {group.name}");
                 }
                 Console.Write("Statuses:\n");
-                foreach (LearningStatus status in LearningStatuses)
+                foreach (LearningStatus status in db.LearningStatuses)
                 {
                     Console.WriteLine($"status id: {status.id}, status: {status.status}");
                 }
@@ -58,7 +55,7 @@ namespace IS_Arch
                     var udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
                     var udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                     udpSocket.Bind(udpEndPoint);
-                    StartReceiving(udpSocket, Students, logger, db, Groups, LearningStatuses);
+                    StartReceiving(udpSocket, logger, db);
                 }
                 catch (Exception e)
                 {
@@ -66,13 +63,16 @@ namespace IS_Arch
                     logger.Error($"Socket/EndPoint error: {e.Message}");
                 }
             }
+            #endregion
         }
 
-        private static async void StartReceiving(Socket udpSocket, List<Student> Students, Logger logger, dbEntities db, 
-            List<Group> Groups, List<LearningStatus> Statuses) // = task
+        private static async void StartReceiving(Socket udpSocket, Logger logger, dbEntities db) // = task
         {
             string server_answer; // Переменная ответа сервера клиенту
             string data; // Данные сообщения от клиента
+            List<Student> Students = db.Students.ToList();
+            List<Group> Groups = db.Groups.ToList();
+            List<LearningStatus> LearningStatuses = db.LearningStatuses.ToList();
             List<Student> newStudents = new List<Student>(); // Лист новых, добавленных во время работы приложения студентов
             IPAddress clientIP = IPAddress.Parse("127.0.0.1"); // this is client's ip and port
             const int clientPort = 8082;
@@ -90,19 +90,19 @@ namespace IS_Arch
                     switch (Convert.ToInt32(data))
                     {
                         case 1: // Вывод всех записей на экран 
-                            server_answer = case1(Students).Result;
+                            server_answer = OutputAllAsync(Students).Result;
                             break;
                         case 2: // Вывод записи по номеру 
-                            server_answer = case2(udpSocket, senderEndPoint, Students).Result;
+                            server_answer = OutputByIDAsync(udpSocket, senderEndPoint, Students).Result;
                             break;
                         case 3: // Запись данных в файл 
-                            server_answer = case3(newStudents, db).Result;
+                            server_answer = RecordsSaveAsync(newStudents, db).Result;
                             break;
                         case 4: // Удалить запись по номеру
-                            server_answer = case4(udpSocket, senderEndPoint, Students, db).Result;
+                            server_answer = DeleteRecordByIDAsync(udpSocket, senderEndPoint, Students, db).Result;
                             break;
                         case 5: // Добавление новой записи
-                            server_answer = case5(udpSocket, senderEndPoint, Students, newStudents, Groups, Statuses).Result;
+                            server_answer = AddNewRecordAsync(udpSocket, senderEndPoint, Students, newStudents, Groups, LearningStatuses).Result;
                             break;
                         default:
                             server_answer = "Incorrect input. Please press the button from 1 to 5.";

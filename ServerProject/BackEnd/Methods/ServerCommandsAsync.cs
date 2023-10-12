@@ -13,6 +13,7 @@ namespace IS_Arch.BackEnd.Methods
 {
     public class ServerCommandsAsync
     {
+        #region Receive/Send data methods
         public static string ReceiveData(Socket udpSocket, EndPoint senderEndPoint)
         {
             string data;
@@ -39,13 +40,15 @@ namespace IS_Arch.BackEnd.Methods
         {
             await Task.Run(() => SendData(udpSocket, senderEndPoint, server_answer));
         }
+        #endregion
 
-        public static async Task<string> case1(List<Student> Students) // Вывод всех записей
+        #region Async server's commands
+        public static async Task<string> OutputAllAsync(List<Student> Students) // Вывод всех записей
         {
             return await Task.Run(() => ConsoleOutputAll(Students));
         }
 
-        public static async Task<string> case2(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students) // Вывод 1 записи по ID
+        public static async Task<string> OutputByIDAsync(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students) // Вывод 1 записи по ID
         {
             string server_answer;
             string data;
@@ -56,9 +59,9 @@ namespace IS_Arch.BackEnd.Methods
             {
                 return await Task.Run(() => OutputByID(Students, Convert.ToInt32(data)).ToString());
             }
-            return "invalid ID format";
+            return IDError;
         }
-        public static async Task<string> case3(List<Student> newStudents, dbEntities db) // Запись данных в файл
+        public static async Task<string> RecordsSaveAsync(List<Student> newStudents, dbEntities db) // Запись данных в файл
         {
             await Task.Run(() =>
             {
@@ -71,21 +74,21 @@ namespace IS_Arch.BackEnd.Methods
         }
 
 
-        public static async Task<string> case4(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students, dbEntities db) // Удалить запись по номеру
+        public static async Task<string> DeleteRecordByIDAsync(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students, dbEntities db) // Удалить запись по номеру
         {
             string server_answer;
             string data;
-            server_answer = "Enter the ID";
+            server_answer = "Enter the ID:\n";
             await SendDataAsync(udpSocket, senderEndPoint, server_answer); // Отправляем клиенту сообщение
             data = ReceiveDataAsync(udpSocket, senderEndPoint).Result;
             if (TypeCheck.IntCheckBool(data))
             {
                 return await Task.Run(() => DeleteRecord(Students, db, Convert.ToInt32(data)).ToString());
             }
-            return "invalid ID format";
+            return IDError;
         }
 
-        public static async Task<string> case5(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students, List<Student> newStudents, List<Group> Groups, List<LearningStatus> Statuses) // Добавить запись
+        public static async Task<string> AddNewRecordAsync(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students, List<Student> newStudents, List<Group> Groups, List<LearningStatus> Statuses) // Добавить запись
         {
             Student varStudent = new Student();
             // Используем паттерн строитель для создания новой сущности
@@ -93,33 +96,47 @@ namespace IS_Arch.BackEnd.Methods
             try
             {
                 bool exit = false;
-                await SendDataAsync(udpSocket, senderEndPoint, " Enter the name:");
+                await SendDataAsync(udpSocket, senderEndPoint, " Enter the name:\n");
                 studentBuilder.AddName(ReceiveDataAsync(udpSocket, senderEndPoint).Result, varStudent); // TODO: посмотри что будент если senddata w/o await
-                await SendDataAsync(udpSocket, senderEndPoint, " Enter the surname:");
+                await SendDataAsync(udpSocket, senderEndPoint, " Enter the surname:\n");
                 studentBuilder.AddSurname(ReceiveDataAsync(udpSocket, senderEndPoint).Result, varStudent);
+                MinAndMaxValues MinAndMaxGroupValues = new MinAndMaxValues();
+                MinAndMaxGroupValues.StatusIDGetMaxAndMin(Statuses);
                 while (!exit)
                 {
-                    await SendDataAsync(udpSocket, senderEndPoint, " Enter the group ID:");
+                    await SendDataAsync(udpSocket, senderEndPoint, " Enter the group ID:\n");
                     string group_id = await ReceiveDataAsync(udpSocket, senderEndPoint);
                     if (TypeCheck.IntCheckBool(group_id))
                     {
-                        await Task.Run(() => studentBuilder.AddGroup(Convert.ToInt32(group_id), varStudent, Groups));
-                        exit = true;
+                        int group_id_int = Convert.ToInt32(group_id);
+                        if (group_id_int > MinAndMaxGroupValues.Min && group_id_int < MinAndMaxGroupValues.Max)
+                        {
+                            await Task.Run(() => studentBuilder.AddGroup(Convert.ToInt32(group_id), varStudent, Groups));
+                            exit = true;
+                        }
+                        else SendDataAsync(udpSocket, senderEndPoint, OUTofbounce);
                     }
-                    else await SendDataAsync(udpSocket, senderEndPoint, " Invalid group ID format. Try again.");
+                    else SendDataAsync(udpSocket, senderEndPoint, IDError);
                 }
-                studentBuilder.AddID(varStudent, Students.Last()); // Берем id у последнего студента
+                studentBuilder.AddID(varStudent, Students.Last()); // Берем id у последнего студента (это все равно не имеет смысла, т.к. при сохранении SQL делает здесь автоинкримент)
                 exit = false;
+                MinAndMaxValues MinAndMaxStatusValues = new MinAndMaxValues();
+                MinAndMaxStatusValues.StatusIDGetMaxAndMin(Statuses);
                 while (!exit)
                 {
-                    await SendDataAsync(udpSocket, senderEndPoint, " Enter the student's learning status ID.");
+                    await SendDataAsync(udpSocket, senderEndPoint, " Enter the student's learning status ID.\n");
                     string status_id = await ReceiveDataAsync(udpSocket, senderEndPoint);
                     if (TypeCheck.IntCheckBool(status_id))
                     {
-                        await Task.Run(() => studentBuilder.AddStatus(Convert.ToInt32(status_id), varStudent, Statuses));
-                        exit = true;
+                        int status_id_int = Convert.ToInt32(status_id);
+                        if (status_id_int > MinAndMaxStatusValues.Min && status_id_int < MinAndMaxStatusValues.Max)
+                        {
+                            await Task.Run(() => studentBuilder.AddStatus(Convert.ToInt32(status_id), varStudent, Statuses));
+                            exit = true;
+                        }
+                        else SendDataAsync(udpSocket, senderEndPoint, OUTofbounce); // no await
                     }
-                    else await SendDataAsync(udpSocket, senderEndPoint, "Invalid ID format. Try again."); // Тут ошибка из-за парса постоянно 
+                    else SendDataAsync(udpSocket, senderEndPoint, IDError); // no await
                 }
                 Students.Add(studentBuilder.GetResult(varStudent));
                 newStudents.Add(studentBuilder.GetResult(varStudent));
@@ -130,5 +147,8 @@ namespace IS_Arch.BackEnd.Methods
                 return $"Error: {ex.Message}\n";
             }
         }
+        #endregion
+        private static readonly string IDError = "\nInvalid ID format. Try again.\n";
+        private static readonly string OUTofbounce = "\nThis ID is out of bounce. Please, select the id from the min allowed to the max.\n";
     }
 }

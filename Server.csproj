@@ -109,6 +109,7 @@
     <Compile Include="ServerProject\DataBase\Group.cs">
       <DependentUpon>dbModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="ServerProject\DataBase\MinAndMaxValues.cs" />
     <Compile Include="ServerProject\DataBase\LearningStatus.cs">
       <DependentUpon>dbModel.tt</DependentUpon>
     </Compile>

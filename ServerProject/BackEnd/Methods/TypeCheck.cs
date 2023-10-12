@@ -1,5 +1,4 @@
-﻿
-namespace IS_Arch.BackEnd
+﻿namespace IS_Arch.BackEnd
 {
     internal class TypeCheck
     {

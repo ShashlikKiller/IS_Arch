@@ -1,5 +1,4 @@
 ﻿using IS_Arch.ServerProject.DataBase;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,7 +26,7 @@ namespace IS_Arch.BackEnd.Methods
                     return answer;
                 }
             }
-            return "No students with this ID were found.";
+            return "No students with this ID were found.\n";
         }
 
         public static string ConsoleOutputAll(List<Student> Students)
@@ -60,7 +59,7 @@ namespace IS_Arch.BackEnd.Methods
             answer
             += $"\nStudent ID: {student.id} \n"
             + $"Name: {student.name} {student.surname}\n"
-            + $"Group: {student.Group.name}, Still learning - {student.LearningStatus.status}\n";
+            + $"Group: {student.Group.name}, Learning status: {student.LearningStatus.status}\n";
             return answer;
         }
 
