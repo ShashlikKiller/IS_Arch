@@ -29,14 +29,39 @@ namespace IS_Arch.BackEnd.Methods
             return "No students with this ID were found.\n";
         }
 
-        public static string ConsoleOutputAll(List<Student> Students)
+        public static string GetName(Student student)
         {
-            string answer = "";
-            foreach (Student student in Students)
-            {
-                answer += ConsoleOutputSingle(student);
-            }
-            return answer;
+            return student.name;
+        }
+
+        public static string GetSurname(Student student)
+        {
+            return student.surname;
+        }
+
+        public static string GetFullName(Student student)
+        {
+            return GetName(student) + GetSurname(student);
+        }
+
+        public static string GetStudentForList(Student student)
+        {
+            return GetUID(student) + GetSurname(student);
+        }
+        
+        public static string GetUID(Student student)
+        {
+            return student.id.ToString();
+        }
+
+        public static string GetLearningStatus(Student student)
+        {
+            return student.LearningStatus.status;
+        }
+
+        public static string GetGroup(Student student)
+        {
+            return student.Group.name;
         }
 
         public static string DeleteRecord(List<Student> Students, dbEntities db, int delete_id)

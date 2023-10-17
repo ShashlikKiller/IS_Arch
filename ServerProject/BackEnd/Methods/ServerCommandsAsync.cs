@@ -43,10 +43,6 @@ namespace IS_Arch.BackEnd.Methods
         #endregion
 
         #region Async server's commands
-        public static async Task<string> OutputAllAsync(List<Student> Students) // Вывод всех записей
-        {
-            return await Task.Run(() => ConsoleOutputAll(Students));
-        }
 
         public static async Task<string> OutputByIDAsync(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students) // Вывод 1 записи по ID
         {
@@ -61,6 +57,7 @@ namespace IS_Arch.BackEnd.Methods
             }
             return IDError;
         }
+
         public static async Task<string> RecordsSaveAsync(List<Student> newStudents, dbEntities db) // Запись данных в файл
         {
             await Task.Run(() =>
