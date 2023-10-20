@@ -12,6 +12,7 @@ namespace IS_Arch.ServerProject.BackEnd.Methods
     internal class DBController
     {
         //TODO: вынести все в один универсальный метод
+        //dfhgfghfghfasdgdfhdf
         public static async Task<List<Group>> GetGroups(dbEntities db) // TODO: сделать так же с остальными из базы данных
         {
                 return await Task.Run(() => db.Groups.ToList());
