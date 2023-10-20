@@ -86,6 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ServerProject\BackEnd\Methods\DataManipulation.cs" />
+    <Compile Include="ServerProject\BackEnd\Methods\DBController.cs" />
     <Compile Include="ServerProject\BackEnd\Methods\ServerCommandsAsync.cs" />
     <Compile Include="ServerProject\BackEnd\Model\StudentBuilder.cs" />
     <Compile Include="ServerProject\BackEnd\Methods\TypeCheck.cs" />

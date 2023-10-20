@@ -142,7 +142,6 @@ namespace IS_Arch.BackEnd.Methods
                 return $"Error: {ex.Message}\n";
             }
         }
-        #endregion
         private static readonly string IDError = "\nInvalid ID format. Try again.\n";
         private static readonly string OUTofbounce = "\nThis ID is out of bounce. Please, select the id from the min allowed to the max.\n";
     }
