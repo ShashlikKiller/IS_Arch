@@ -42,9 +42,7 @@ namespace IS_Arch.BackEnd.Methods
         }
         #endregion
 
-        #region Async server's commands
-
-        public static async Task<string> OutputByIDAsync(Socket udpSocket, EndPoint senderEndPoint, List<Student> Students) // Вывод 1 записи по ID
+        public async Task SendGroups(Socket udpSocket, EndPoint senderEndPoint, dbEntities db)
         {
             string server_answer;
             string data;
